@@ -7,68 +7,161 @@
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     mc:Ignorable="d">
 
-    <Grid Padding="24" RowSpacing="16">
+    <Grid Padding="24" RowSpacing="16" ColumnSpacing="16">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="320"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <!-- Header pagina -->
-        <StackPanel Grid.Row="0" Spacing="4">
+        <!-- ============================================ -->
+        <!-- HEADER (full width)                          -->
+        <!-- ============================================ -->
+        <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Spacing="4">
             <TextBlock Text="CSV Studio" FontSize="28" FontWeight="SemiBold"/>
             <TextBlock Text="Carica un file CSV per iniziare." Opacity="0.7"/>
         </StackPanel>
 
-        <!-- Area drop -->
-        <Border Grid.Row="1"
+        <!-- ============================================ -->
+        <!-- DROP AREA (full width)                       -->
+        <!-- ============================================ -->
+        <Border Grid.Row="1" Grid.ColumnSpan="2"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
                 CornerRadius="12"
-                Padding="24"
+                Padding="20"
                 AllowDrop="True"
                 DragOver="DropArea_DragOver"
                 Drop="DropArea_Drop">
-            <StackPanel HorizontalAlignment="Center" Spacing="12">
-                <FontIcon Glyph="&#xE8E5;" FontSize="40"/>
-                <TextBlock Text="Trascina qui un file CSV"
-                           HorizontalAlignment="Center"
-                           FontWeight="SemiBold"/>
-                <TextBlock Text="oppure" HorizontalAlignment="Center" Opacity="0.6"/>
-                <Button Content="Sfoglia file..." Click="BrowseButton_Click" HorizontalAlignment="Center"/>
-                <TextBlock x:Name="FileInfoText"
-                           HorizontalAlignment="Center"
-                           Opacity="0.8"
-                           Margin="0,8,0,0"/>
+            <StackPanel HorizontalAlignment="Center" Spacing="8" Orientation="Horizontal">
+                <FontIcon Glyph="&#xE8E5;" FontSize="28" VerticalAlignment="Center"/>
+                <TextBlock Text="Trascina qui un file CSV" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                <TextBlock Text=" oppure " VerticalAlignment="Center" Opacity="0.6"/>
+                <Button Content="Sfoglia file..." Click="BrowseButton_Click" VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
 
-        <!-- Pannello detection -->
-        <Border Grid.Row="2"
-                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+        <!-- ============================================ -->
+        <!-- SIDEBAR (left column)                        -->
+        <!-- ============================================ -->
+        <Border Grid.Row="2" Grid.Column="0"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
-                CornerRadius="8"
-                Padding="16,12">
-            <StackPanel Spacing="6">
-                <TextBlock Text="Auto-detection"
-                           FontWeight="SemiBold"
-                           Opacity="0.9"/>
-                <TextBlock x:Name="DetectionInfoText"
-                           Opacity="0.85"
-                           TextWrapping="Wrap"
-                           FontFamily="Consolas"/>
-            </StackPanel>
+                CornerRadius="12"
+                Padding="16">
+            <ScrollViewer>
+                <StackPanel Spacing="16">
+
+                    <!-- File details -->
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="File details" FontWeight="SemiBold" Opacity="0.9"/>
+                        <TextBlock x:Name="FileNameText" Text="Nessun file caricato" Opacity="0.85" TextWrapping="Wrap"/>
+                        <TextBlock x:Name="FileStatsText" Opacity="0.7" FontSize="12"/>
+                    </StackPanel>
+
+                    <Border Background="{ThemeResource CardStrokeColorDefaultBrush}" Height="1" Opacity="0.4"/>
+
+                    <!-- Override controls -->
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Format" FontWeight="SemiBold" Opacity="0.9"/>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Encoding" FontSize="12" Opacity="0.7"/>
+                            <ComboBox x:Name="EncodingCombo" HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="UTF-8" Tag="utf-8"/>
+                                <ComboBoxItem Content="UTF-8 with BOM" Tag="utf-8-bom"/>
+                                <ComboBoxItem Content="UTF-16 LE" Tag="utf-16"/>
+                                <ComboBoxItem Content="UTF-16 BE" Tag="utf-16BE"/>
+                                <ComboBoxItem Content="Windows-1252 (ANSI)" Tag="windows-1252"/>
+                                <ComboBoxItem Content="ISO-8859-1" Tag="iso-8859-1"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Separator" FontSize="12" Opacity="0.7"/>
+                            <ComboBox x:Name="SeparatorCombo" HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="Comma (,)" Tag=","/>
+                                <ComboBoxItem Content="Semicolon (;)" Tag=";"/>
+                                <ComboBoxItem Content="Tab (\t)" Tag="\t"/>
+                                <ComboBoxItem Content="Pipe (|)" Tag="|"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Quote character" FontSize="12" Opacity="0.7"/>
+                            <ComboBox x:Name="QuoteCombo" HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="Double quote (&quot;)" Tag="&quot;"/>
+                                <ComboBoxItem Content="Single quote (')" Tag="'"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <CheckBox x:Name="HasHeaderCheck" Content="First row is header" IsChecked="True"/>
+
+                        <Button x:Name="ApplyButton"
+                                Content="Apply"
+                                HorizontalAlignment="Stretch"
+                                Style="{ThemeResource AccentButtonStyle}"
+                                Click="ApplyButton_Click"
+                                IsEnabled="False"/>
+                    </StackPanel>
+
+                    <Border Background="{ThemeResource CardStrokeColorDefaultBrush}" Height="1" Opacity="0.4"/>
+
+                    <!-- Auto-detection info -->
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Auto-detection" FontWeight="SemiBold" Opacity="0.9"/>
+                        <TextBlock x:Name="DetectionInfoText"
+                                   Opacity="0.75"
+                                   TextWrapping="Wrap"
+                                   FontFamily="Consolas"
+                                   FontSize="12"/>
+                    </StackPanel>
+
+                </StackPanel>
+            </ScrollViewer>
         </Border>
 
-        <!-- Preview tabella -->
-        <controls:DataGrid x:Name="PreviewGrid"
-                           Grid.Row="3"
-                           AutoGenerateColumns="False"
-                           IsReadOnly="True"
-                           GridLinesVisibility="Horizontal"
-                           HeadersVisibility="Column"/>
+        <!-- ============================================ -->
+        <!-- MAIN CONTENT — Tabs (right column)           -->
+        <!-- ============================================ -->
+        <Grid Grid.Row="2" Grid.Column="1">
+            <Pivot x:Name="MainPivot">
+
+                <PivotItem Header="Preview">
+                    <controls:DataGrid x:Name="PreviewGrid"
+                                       AutoGenerateColumns="False"
+                                       IsReadOnly="True"
+                                       GridLinesVisibility="Horizontal"
+                                       HeadersVisibility="Column"/>
+                </PivotItem>
+
+                <PivotItem Header="Statistics">
+                    <controls:DataGrid x:Name="StatsGrid"
+                                       AutoGenerateColumns="False"
+                                       IsReadOnly="True"
+                                       GridLinesVisibility="Horizontal"
+                                       HeadersVisibility="Column">
+                        <controls:DataGrid.Columns>
+                            <controls:DataGridTextColumn Header="Column" Binding="{Binding ColumnName}" Width="2*"/>
+                            <controls:DataGridTextColumn Header="Type" Binding="{Binding DetectedType}" Width="*"/>
+                            <controls:DataGridTextColumn Header="Empty" Binding="{Binding EmptyValues}" Width="*"/>
+                            <controls:DataGridTextColumn Header="Empty %" Binding="{Binding EmptyPercentage}" Width="*"/>
+                            <controls:DataGridTextColumn Header="Distinct" Binding="{Binding DistinctValues}" Width="*"/>
+                            <controls:DataGridTextColumn Header="Duplicates" Binding="{Binding DuplicateValues}" Width="*"/>
+                            <controls:DataGridTextColumn Header="Min" Binding="{Binding MinValue}" Width="2*"/>
+                            <controls:DataGridTextColumn Header="Max" Binding="{Binding MaxValue}" Width="2*"/>
+                        </controls:DataGrid.Columns>
+                    </controls:DataGrid>
+                </PivotItem>
+
+            </Pivot>
+        </Grid>
+
     </Grid>
 </Page>
