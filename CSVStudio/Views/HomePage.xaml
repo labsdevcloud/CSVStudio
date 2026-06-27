@@ -1,0 +1,52 @@
+<Page
+    x:Class="CSVStudio.Views.HomePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    mc:Ignorable="d">
+
+    <Grid Padding="24" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock Text="CSV Studio" FontSize="28" FontWeight="SemiBold"/>
+            <TextBlock Text="Carica un file CSV per iniziare." Opacity="0.7"/>
+        </StackPanel>
+
+        <Border Grid.Row="1"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="24"
+                AllowDrop="True"
+                DragOver="DropArea_DragOver"
+                Drop="DropArea_Drop">
+            <StackPanel HorizontalAlignment="Center" Spacing="12">
+                <FontIcon Glyph="&#xE8E5;" FontSize="40"/>
+                <TextBlock Text="Trascina qui un file CSV"
+                           HorizontalAlignment="Center"
+                           FontWeight="SemiBold"/>
+                <TextBlock Text="oppure" HorizontalAlignment="Center" Opacity="0.6"/>
+                <Button Content="Sfoglia file..." Click="BrowseButton_Click" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="FileInfoText"
+                           HorizontalAlignment="Center"
+                           Opacity="0.7"
+                           Margin="0,8,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <controls:DataGrid x:Name="PreviewGrid"
+                   Grid.Row="2"
+                   AutoGenerateColumns="False"
+                   IsReadOnly="True"
+                   GridLinesVisibility="Horizontal"
+                   HeadersVisibility="Column"/>
+    </Grid>
+</Page>
