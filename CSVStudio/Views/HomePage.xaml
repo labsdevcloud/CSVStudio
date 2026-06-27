@@ -11,14 +11,17 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- Header pagina -->
         <StackPanel Grid.Row="0" Spacing="4">
             <TextBlock Text="CSV Studio" FontSize="28" FontWeight="SemiBold"/>
             <TextBlock Text="Carica un file CSV per iniziare." Opacity="0.7"/>
         </StackPanel>
 
+        <!-- Area drop -->
         <Border Grid.Row="1"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -37,16 +40,35 @@
                 <Button Content="Sfoglia file..." Click="BrowseButton_Click" HorizontalAlignment="Center"/>
                 <TextBlock x:Name="FileInfoText"
                            HorizontalAlignment="Center"
-                           Opacity="0.7"
+                           Opacity="0.8"
                            Margin="0,8,0,0"/>
             </StackPanel>
         </Border>
 
+        <!-- Pannello detection -->
+        <Border Grid.Row="2"
+                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="16,12">
+            <StackPanel Spacing="6">
+                <TextBlock Text="Auto-detection"
+                           FontWeight="SemiBold"
+                           Opacity="0.9"/>
+                <TextBlock x:Name="DetectionInfoText"
+                           Opacity="0.85"
+                           TextWrapping="Wrap"
+                           FontFamily="Consolas"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Preview tabella -->
         <controls:DataGrid x:Name="PreviewGrid"
-                   Grid.Row="2"
-                   AutoGenerateColumns="False"
-                   IsReadOnly="True"
-                   GridLinesVisibility="Horizontal"
-                   HeadersVisibility="Column"/>
+                           Grid.Row="3"
+                           AutoGenerateColumns="False"
+                           IsReadOnly="True"
+                           GridLinesVisibility="Horizontal"
+                           HeadersVisibility="Column"/>
     </Grid>
 </Page>
