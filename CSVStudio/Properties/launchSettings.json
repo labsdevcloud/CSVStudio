@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "CSVStudio (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "CSVStudio (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
