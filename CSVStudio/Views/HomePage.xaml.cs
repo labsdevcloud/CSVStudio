@@ -14,6 +14,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -27,6 +28,7 @@ namespace CSVStudio.Views
         // ─────────────────────────────────────────────────
         private readonly CsvDetectionService _detection = new();
         private readonly CsvStatisticsService _statistics = new();
+        private readonly CsvExportService _export = new();
 
         // ─────────────────────────────────────────────────
         // STATE
@@ -43,7 +45,11 @@ namespace CSVStudio.Views
         {
             new TrimSpacesOperation(),
             new RemoveEmptyRowsOperation(),
-            new RemoveDuplicateRowsOperation()
+            new RemoveDuplicateRowsOperation(),
+            new RemoveDuplicateColumnsOperation(),
+            new ChangeCaseOperation(CaseMode.Upper),
+            new ChangeCaseOperation(CaseMode.Lower),
+            new ChangeCaseOperation(CaseMode.Title)
         };
 
         // ─────────────────────────────────────────────────
@@ -302,12 +308,17 @@ namespace CSVStudio.Views
             }
 
             _currentDataset = _originalDataset.Clone();
+            RebuildPreviewColumns();
             RefreshDataView();
             ShowInfoBar("Dataset ripristinato.", InfoBarSeverity.Informational);
         }
 
         private void RefreshDataView()
         {
+            // Se il numero di colonne è cambiato, ricostruisco le colonne
+            if (PreviewGrid.Columns.Count != _currentDataset.Headers.Length)
+                RebuildPreviewColumns();
+
             // Refresh preview
             PreviewGrid.ItemsSource = null;
             PreviewGrid.ItemsSource = _currentDataset.Rows;
@@ -328,11 +339,103 @@ namespace CSVStudio.Views
             }
         }
 
+        private void RebuildPreviewColumns()
+        {
+            PreviewGrid.Columns.Clear();
+            for (int i = 0; i < _currentDataset.Headers.Length; i++)
+            {
+                var col = new DataGridTextColumn
+                {
+                    Header = _currentDataset.Headers[i],
+                    Binding = new Binding { Path = new PropertyPath($"[{_currentDataset.UniqueKeys[i]}]") }
+                };
+                PreviewGrid.Columns.Add(col);
+            }
+        }
+
         private void ShowInfoBar(string message, InfoBarSeverity severity)
         {
             OperationResultBar.Message = message;
             OperationResultBar.Severity = severity;
             OperationResultBar.IsOpen = true;
+        }
+
+        // ─────────────────────────────────────────────────
+        // EXPORT
+        // ─────────────────────────────────────────────────
+        private async void ExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentDataset.Rows.Count == 0)
+            {
+                ShowInfoBar("Carica prima un file CSV.", InfoBarSeverity.Warning);
+                return;
+            }
+
+            var format = (ExportFormatCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "csv";
+            var picker = new FileSavePicker();
+
+            if (format == "json")
+            {
+                picker.FileTypeChoices.Add("JSON file", new List<string> { ".json" });
+                picker.SuggestedFileName = "export";
+            }
+            else
+            {
+                picker.FileTypeChoices.Add("CSV file", new List<string> { ".csv" });
+                picker.SuggestedFileName = "export";
+            }
+
+            if (App.MainWindow is null) return;
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
+            var file = await picker.PickSaveFileAsync();
+            if (file == null) return;
+
+            try
+            {
+                if (format == "json")
+                {
+                    await _export.ExportToJsonAsync(_currentDataset, file.Path);
+                }
+                else
+                {
+                    var encoding = GetExportEncoding();
+                    var separator = GetExportSeparator();
+                    await _export.ExportToCsvAsync(_currentDataset, file.Path, encoding, separator, '"');
+                }
+
+                ShowInfoBar($"File salvato: {file.Name}", InfoBarSeverity.Success);
+            }
+            catch (Exception ex)
+            {
+                ShowInfoBar($"Errore export: {ex.Message}", InfoBarSeverity.Error);
+            }
+        }
+
+        private Encoding GetExportEncoding()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            var tag = (ExportEncodingCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+            return tag switch
+            {
+                "utf-8-bom" => new UTF8Encoding(true),
+                "utf-16" => Encoding.Unicode,
+                "windows-1252" => Encoding.GetEncoding(1252),
+                _ => new UTF8Encoding(false)
+            };
+        }
+
+        private char GetExportSeparator()
+        {
+            var tag = (ExportSeparatorCombo.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+            return tag switch
+            {
+                "\t" => '\t',
+                ";" => ';',
+                "|" => '|',
+                _ => ','
+            };
         }
 
         // ─────────────────────────────────────────────────

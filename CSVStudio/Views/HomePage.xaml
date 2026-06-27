@@ -133,6 +133,7 @@
         <Grid Grid.Row="2" Grid.Column="1">
             <Pivot x:Name="MainPivot">
 
+                <!-- ─── Preview ─── -->
                 <PivotItem Header="Preview">
                     <controls:DataGrid x:Name="PreviewGrid"
                                        AutoGenerateColumns="False"
@@ -141,6 +142,7 @@
                                        HeadersVisibility="Column"/>
                 </PivotItem>
 
+                <!-- ─── Statistics ─── -->
                 <PivotItem Header="Statistics">
                     <controls:DataGrid x:Name="StatsGrid"
                                        AutoGenerateColumns="False"
@@ -148,34 +150,39 @@
                                        GridLinesVisibility="Horizontal"
                                        HeadersVisibility="Column">
                         <controls:DataGrid.Columns>
-                            <controls:DataGridTextColumn Header="Column" Binding="{Binding ColumnName}" Width="2*"/>
-                            <controls:DataGridTextColumn Header="Type" Binding="{Binding DetectedType}" Width="*"/>
-                            <controls:DataGridTextColumn Header="Empty" Binding="{Binding EmptyValues}" Width="*"/>
-                            <controls:DataGridTextColumn Header="Empty %" Binding="{Binding EmptyPercentage}" Width="*"/>
-                            <controls:DataGridTextColumn Header="Distinct" Binding="{Binding DistinctValues}" Width="*"/>
-                            <controls:DataGridTextColumn Header="Duplicates" Binding="{Binding DuplicateValues}" Width="*"/>
-                            <controls:DataGridTextColumn Header="Min" Binding="{Binding MinValue}" Width="2*"/>
-                            <controls:DataGridTextColumn Header="Max" Binding="{Binding MaxValue}" Width="2*"/>
+                            <controls:DataGridTextColumn Header="Column"     Binding="{Binding ColumnName}"        Width="2*"/>
+                            <controls:DataGridTextColumn Header="Type"       Binding="{Binding DetectedType}"      Width="*"/>
+                            <controls:DataGridTextColumn Header="Empty"      Binding="{Binding EmptyValues}"       Width="*"/>
+                            <controls:DataGridTextColumn Header="Empty %"    Binding="{Binding EmptyPercentage}"   Width="*"/>
+                            <controls:DataGridTextColumn Header="Distinct"   Binding="{Binding DistinctValues}"    Width="*"/>
+                            <controls:DataGridTextColumn Header="Duplicates" Binding="{Binding DuplicateValues}"   Width="*"/>
+                            <controls:DataGridTextColumn Header="Min"        Binding="{Binding MinValue}"          Width="2*"/>
+                            <controls:DataGridTextColumn Header="Max"        Binding="{Binding MaxValue}"          Width="2*"/>
                         </controls:DataGrid.Columns>
                     </controls:DataGrid>
                 </PivotItem>
+
+                <!-- ─── Operations + Export ─── -->
                 <PivotItem Header="Operations">
                     <ScrollViewer>
-                        <StackPanel Spacing="12" Padding="0,8,0,0">
+                        <StackPanel Spacing="16" Padding="0,8,0,0">
 
+                            <!-- ============================ -->
+                            <!-- CLEANUP                       -->
+                            <!-- ============================ -->
                             <TextBlock Text="Cleanup operations"
-                       FontWeight="SemiBold"
-                       Opacity="0.9"/>
+                                       FontWeight="SemiBold"
+                                       Opacity="0.9"/>
 
                             <ItemsControl x:Name="OperationsList">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                BorderThickness="1"
-                                CornerRadius="8"
-                                Padding="16,12"
-                                Margin="0,0,0,8">
+                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="8"
+                                                Padding="16,12"
+                                                Margin="0,0,0,8">
                                             <Grid ColumnSpacing="12">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto"/>
@@ -184,22 +191,22 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <FontIcon Grid.Column="0"
-                                          Glyph="{Binding IconGlyph}"
-                                          FontSize="22"
-                                          VerticalAlignment="Center"/>
+                                                          Glyph="{Binding IconGlyph}"
+                                                          FontSize="22"
+                                                          VerticalAlignment="Center"/>
 
                                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
                                                     <TextBlock Text="{Binding Description}"
-                                               Opacity="0.7" FontSize="12"
-                                               TextWrapping="Wrap"/>
+                                                               Opacity="0.7" FontSize="12"
+                                                               TextWrapping="Wrap"/>
                                                 </StackPanel>
 
                                                 <Button Grid.Column="2"
-                                        Content="Apply"
-                                        Click="OperationApply_Click"
-                                        Tag="{Binding}"
-                                        VerticalAlignment="Center"/>
+                                                        Content="Apply"
+                                                        Click="OperationApply_Click"
+                                                        Tag="{Binding}"
+                                                        VerticalAlignment="Center"/>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -207,21 +214,77 @@
                             </ItemsControl>
 
                             <InfoBar x:Name="OperationResultBar"
-                     IsOpen="False"
-                     Severity="Success"
-                     Margin="0,8,0,0"/>
-
-                            <Border Background="{ThemeResource CardStrokeColorDefaultBrush}"
-                    Height="1" Opacity="0.4" Margin="0,12"/>
+                                     IsOpen="False"
+                                     Severity="Success"
+                                     Margin="0,8,0,0"/>
 
                             <Button x:Name="ResetButton"
-                    Content="Reset to original"
-                    Click="ResetButton_Click"
-                    HorizontalAlignment="Stretch"/>
+                                    Content="Reset to original"
+                                    Click="ResetButton_Click"
+                                    HorizontalAlignment="Stretch"/>
+
+                            <Border Background="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    Height="1" Opacity="0.4" Margin="0,8"/>
+
+                            <!-- ============================ -->
+                            <!-- EXPORT                        -->
+                            <!-- ============================ -->
+                            <TextBlock Text="Export"
+                                       FontWeight="SemiBold"
+                                       Opacity="0.9"/>
+
+                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Padding="16">
+                                <StackPanel Spacing="12">
+
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Format" FontSize="12" Opacity="0.7"/>
+                                        <ComboBox x:Name="ExportFormatCombo"
+                                                  HorizontalAlignment="Stretch"
+                                                  SelectedIndex="0">
+                                            <ComboBoxItem Content="CSV" Tag="csv"/>
+                                            <ComboBoxItem Content="JSON" Tag="json"/>
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Encoding (CSV)" FontSize="12" Opacity="0.7"/>
+                                        <ComboBox x:Name="ExportEncodingCombo"
+                                                  HorizontalAlignment="Stretch"
+                                                  SelectedIndex="0">
+                                            <ComboBoxItem Content="UTF-8" Tag="utf-8"/>
+                                            <ComboBoxItem Content="UTF-8 with BOM" Tag="utf-8-bom"/>
+                                            <ComboBoxItem Content="UTF-16 LE" Tag="utf-16"/>
+                                            <ComboBoxItem Content="Windows-1252 (ANSI)" Tag="windows-1252"/>
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Separator (CSV)" FontSize="12" Opacity="0.7"/>
+                                        <ComboBox x:Name="ExportSeparatorCombo"
+                                                  HorizontalAlignment="Stretch"
+                                                  SelectedIndex="0">
+                                            <ComboBoxItem Content="Comma (,)" Tag=","/>
+                                            <ComboBoxItem Content="Semicolon (;)" Tag=";"/>
+                                            <ComboBoxItem Content="Tab" Tag="\t"/>
+                                            <ComboBoxItem Content="Pipe (|)" Tag="|"/>
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <Button Content="Save as..."
+                                            Style="{ThemeResource AccentButtonStyle}"
+                                            HorizontalAlignment="Stretch"
+                                            Click="ExportButton_Click"/>
+                                </StackPanel>
+                            </Border>
 
                         </StackPanel>
                     </ScrollViewer>
                 </PivotItem>
+
             </Pivot>
         </Grid>
 
