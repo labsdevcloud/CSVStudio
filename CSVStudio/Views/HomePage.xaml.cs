@@ -1,6 +1,7 @@
 using CommunityToolkit.WinUI.UI.Controls;
 using CSVStudio.Models;
 using CSVStudio.Services;
+using CSVStudio.Services.Operations;
 using CsvHelper;
 using CsvHelper.Configuration;
 using Microsoft.UI.Xaml;
@@ -21,19 +22,37 @@ namespace CSVStudio.Views
 {
     public sealed partial class HomePage : Page
     {
+        // ─────────────────────────────────────────────────
+        // SERVICES
+        // ─────────────────────────────────────────────────
         private readonly CsvDetectionService _detection = new();
         private readonly CsvStatisticsService _statistics = new();
 
-        // Stato corrente
+        // ─────────────────────────────────────────────────
+        // STATE
+        // ─────────────────────────────────────────────────
         private string? _currentFilePath;
         private CsvFileInfo? _currentInfo;
-        private string[] _currentHeaders = Array.Empty<string>();
-        private string[] _currentUniqueKeys = Array.Empty<string>();
-        private List<IDictionary<string, object>> _currentRows = new();
 
+        // Dataset corrente (modificato dalle operazioni) e originale (per Reset)
+        private CsvDataset _currentDataset = new();
+        private CsvDataset? _originalDataset;
+
+        // Operazioni disponibili
+        private readonly List<ICsvOperation> _availableOperations = new()
+        {
+            new TrimSpacesOperation(),
+            new RemoveEmptyRowsOperation(),
+            new RemoveDuplicateRowsOperation()
+        };
+
+        // ─────────────────────────────────────────────────
+        // CTOR
+        // ─────────────────────────────────────────────────
         public HomePage()
         {
             this.InitializeComponent();
+            OperationsList.ItemsSource = _availableOperations;
         }
 
         // ─────────────────────────────────────────────────
@@ -77,7 +96,7 @@ namespace CSVStudio.Views
         }
 
         // ─────────────────────────────────────────────────
-        // LOAD: detection automatica
+        // LOAD: auto-detection iniziale
         // ─────────────────────────────────────────────────
         private void LoadFile(string path)
         {
@@ -87,10 +106,7 @@ namespace CSVStudio.Views
                 var info = _detection.Detect(path);
                 _currentInfo = info;
 
-                // Sync UI controls con i valori rilevati
                 SyncOverrideControls(info);
-
-                // Carica i dati
                 LoadCsvWithInfo(info);
             }
             catch (Exception ex)
@@ -100,7 +116,7 @@ namespace CSVStudio.Views
         }
 
         // ─────────────────────────────────────────────────
-        // APPLY: ricarica con parametri manuali
+        // APPLY OVERRIDE: ricarica con parametri scelti
         // ─────────────────────────────────────────────────
         private void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
@@ -116,7 +132,7 @@ namespace CSVStudio.Views
                     Encoding = GetSelectedEncoding(),
                     EncodingName = GetSelectedEncodingName(),
                     Separator = GetSelectedSeparator(),
-                    SeparatorName = (EncodingNameFromCombo(SeparatorCombo) ?? "Custom"),
+                    SeparatorName = EncodingNameFromCombo(SeparatorCombo) ?? "Custom",
                     Quote = GetSelectedQuote(),
                     QuoteName = GetSelectedQuote() == '"' ? "Double quote" : "Single quote",
                     HasHeader = HasHeaderCheck.IsChecked ?? true
@@ -221,10 +237,6 @@ namespace CSVStudio.Views
             info.PreviewRows = rowCount;
             info.ColumnCount = headers.Length;
 
-            _currentHeaders = headers;
-            _currentUniqueKeys = uniqueKeys;
-            _currentRows = rows;
-
             PreviewGrid.ItemsSource = rows;
 
             // Statistiche
@@ -233,7 +245,94 @@ namespace CSVStudio.Views
 
             // UI info
             UpdateInfoPanels(info, duplicates);
+
+            // Dataset corrente + snapshot originale
+            _currentDataset = new CsvDataset
+            {
+                Headers = headers,
+                UniqueKeys = uniqueKeys,
+                Rows = rows,
+                Info = info
+            };
+            _originalDataset = _currentDataset.Clone();
+
             ApplyButton.IsEnabled = true;
+        }
+
+        // ─────────────────────────────────────────────────
+        // OPERATIONS
+        // ─────────────────────────────────────────────────
+        private void OperationApply_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentDataset.Rows.Count == 0)
+            {
+                ShowInfoBar("Carica prima un file CSV.", InfoBarSeverity.Warning);
+                return;
+            }
+
+            if (sender is Button btn && btn.Tag is ICsvOperation op)
+            {
+                try
+                {
+                    var result = op.Execute(_currentDataset);
+                    if (result.Success)
+                    {
+                        _currentDataset = result.Dataset;
+                        RefreshDataView();
+                        ShowInfoBar($"{op.Name}: {result.Summary}", InfoBarSeverity.Success);
+                    }
+                    else
+                    {
+                        ShowInfoBar($"{op.Name} failed.", InfoBarSeverity.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ShowInfoBar($"Errore: {ex.Message}", InfoBarSeverity.Error);
+                }
+            }
+        }
+
+        private void ResetButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_originalDataset is null)
+            {
+                ShowInfoBar("Niente da resettare.", InfoBarSeverity.Warning);
+                return;
+            }
+
+            _currentDataset = _originalDataset.Clone();
+            RefreshDataView();
+            ShowInfoBar("Dataset ripristinato.", InfoBarSeverity.Informational);
+        }
+
+        private void RefreshDataView()
+        {
+            // Refresh preview
+            PreviewGrid.ItemsSource = null;
+            PreviewGrid.ItemsSource = _currentDataset.Rows;
+
+            // Refresh stats
+            var stats = _statistics.Compute(
+                _currentDataset.Headers,
+                _currentDataset.UniqueKeys,
+                _currentDataset.Rows);
+            StatsGrid.ItemsSource = stats;
+
+            // Refresh sidebar info
+            if (_currentInfo != null)
+            {
+                FileStatsText.Text =
+                    $"{_currentDataset.RowCount} righe • {_currentDataset.ColumnCount} colonne • " +
+                    $"{FormatSize(_currentInfo.FileSizeBytes)}";
+            }
+        }
+
+        private void ShowInfoBar(string message, InfoBarSeverity severity)
+        {
+            OperationResultBar.Message = message;
+            OperationResultBar.Severity = severity;
+            OperationResultBar.IsOpen = true;
         }
 
         // ─────────────────────────────────────────────────
@@ -390,7 +489,6 @@ namespace CSVStudio.Views
                     return;
                 }
             }
-            // Fallback: primo elemento
             if (combo.Items.Count > 0) combo.SelectedIndex = 0;
         }
 

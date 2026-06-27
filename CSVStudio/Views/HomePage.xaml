@@ -159,7 +159,69 @@
                         </controls:DataGrid.Columns>
                     </controls:DataGrid>
                 </PivotItem>
+                <PivotItem Header="Operations">
+                    <ScrollViewer>
+                        <StackPanel Spacing="12" Padding="0,8,0,0">
 
+                            <TextBlock Text="Cleanup operations"
+                       FontWeight="SemiBold"
+                       Opacity="0.9"/>
+
+                            <ItemsControl x:Name="OperationsList">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="16,12"
+                                Margin="0,0,0,8">
+                                            <Grid ColumnSpacing="12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <FontIcon Grid.Column="0"
+                                          Glyph="{Binding IconGlyph}"
+                                          FontSize="22"
+                                          VerticalAlignment="Center"/>
+
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{Binding Description}"
+                                               Opacity="0.7" FontSize="12"
+                                               TextWrapping="Wrap"/>
+                                                </StackPanel>
+
+                                                <Button Grid.Column="2"
+                                        Content="Apply"
+                                        Click="OperationApply_Click"
+                                        Tag="{Binding}"
+                                        VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <InfoBar x:Name="OperationResultBar"
+                     IsOpen="False"
+                     Severity="Success"
+                     Margin="0,8,0,0"/>
+
+                            <Border Background="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Height="1" Opacity="0.4" Margin="0,12"/>
+
+                            <Button x:Name="ResetButton"
+                    Content="Reset to original"
+                    Click="ResetButton_Click"
+                    HorizontalAlignment="Stretch"/>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </PivotItem>
             </Pivot>
         </Grid>
 
