@@ -67,7 +67,7 @@ namespace CSVStudio.Views
         private void DropArea_DragOver(object sender, DragEventArgs e)
         {
             e.AcceptedOperation = DataPackageOperation.Copy;
-            e.DragUIOverride.Caption = "Rilascia per caricare";
+            e.DragUIOverride.Caption = "Drop to load";
             e.DragUIOverride.IsCaptionVisible = true;
         }
 
@@ -117,7 +117,7 @@ namespace CSVStudio.Views
             }
             catch (Exception ex)
             {
-                ShowError($"Errore: {ex.Message}");
+                ShowError($"Error: {ex.Message}");
             }
         }
 
@@ -149,7 +149,7 @@ namespace CSVStudio.Views
             }
             catch (Exception ex)
             {
-                ShowError($"Errore apply: {ex.Message}");
+                ShowError($"Apply error: {ex.Message}");
             }
         }
 
@@ -190,7 +190,7 @@ namespace CSVStudio.Views
 
             if (headers.Length == 0)
             {
-                ShowError("Nessuna colonna trovata.");
+                ShowError("No columns found.");
                 return;
             }
 
@@ -272,7 +272,7 @@ namespace CSVStudio.Views
         {
             if (_currentDataset.Rows.Count == 0)
             {
-                ShowInfoBar("Carica prima un file CSV.", InfoBarSeverity.Warning);
+                ShowInfoBar("Load a CSV file first.", InfoBarSeverity.Warning);
                 return;
             }
 
@@ -294,7 +294,7 @@ namespace CSVStudio.Views
                 }
                 catch (Exception ex)
                 {
-                    ShowInfoBar($"Errore: {ex.Message}", InfoBarSeverity.Error);
+                    ShowInfoBar($"Error: {ex.Message}", InfoBarSeverity.Error);
                 }
             }
         }
@@ -303,14 +303,14 @@ namespace CSVStudio.Views
         {
             if (_originalDataset is null)
             {
-                ShowInfoBar("Niente da resettare.", InfoBarSeverity.Warning);
+                ShowInfoBar("Nothing to reset.", InfoBarSeverity.Warning);
                 return;
             }
 
             _currentDataset = _originalDataset.Clone();
             RebuildPreviewColumns();
             RefreshDataView();
-            ShowInfoBar("Dataset ripristinato.", InfoBarSeverity.Informational);
+            ShowInfoBar("Dataset restored.", InfoBarSeverity.Informational);
         }
 
         private void RefreshDataView()
@@ -405,11 +405,11 @@ namespace CSVStudio.Views
                     await _export.ExportToCsvAsync(_currentDataset, file.Path, encoding, separator, '"');
                 }
 
-                ShowInfoBar($"File salvato: {file.Name}", InfoBarSeverity.Success);
+                ShowInfoBar($"File saved: {file.Name}", InfoBarSeverity.Success);
             }
             catch (Exception ex)
             {
-                ShowInfoBar($"Errore export: {ex.Message}", InfoBarSeverity.Error);
+                ShowInfoBar($"Export error: {ex.Message}", InfoBarSeverity.Error);
             }
         }
 
@@ -444,7 +444,7 @@ namespace CSVStudio.Views
         private void UpdateInfoPanels(CsvFileInfo info, List<string> duplicates)
         {
             FileNameText.Text = info.FileName;
-            FileStatsText.Text = $"{info.PreviewRows} righe (preview) • {info.ColumnCount} colonne • {FormatSize(info.FileSizeBytes)}";
+            FileStatsText.Text = $"{info.PreviewRows} rows (preview) • {info.ColumnCount} columns • {FormatSize(info.FileSizeBytes)}";
 
             var lines = new List<string>
             {
@@ -472,7 +472,7 @@ namespace CSVStudio.Views
 
         private void ShowError(string msg)
         {
-            FileNameText.Text = "Errore";
+            FileNameText.Text = "Error";
             FileStatsText.Text = msg;
             DetectionInfoText.Text = string.Empty;
             PreviewGrid.ItemsSource = null;

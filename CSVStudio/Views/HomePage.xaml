@@ -18,17 +18,13 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- ============================================ -->
-        <!-- HEADER (full width)                          -->
-        <!-- ============================================ -->
+        <!-- HEADER -->
         <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Spacing="4">
             <TextBlock Text="CSV Studio" FontSize="28" FontWeight="SemiBold"/>
-            <TextBlock Text="Carica un file CSV per iniziare." Opacity="0.7"/>
+            <TextBlock Text="Load a CSV file to get started." Opacity="0.7"/>
         </StackPanel>
 
-        <!-- ============================================ -->
-        <!-- DROP AREA (full width)                       -->
-        <!-- ============================================ -->
+        <!-- DROP AREA -->
         <Border Grid.Row="1" Grid.ColumnSpan="2"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -40,15 +36,13 @@
                 Drop="DropArea_Drop">
             <StackPanel HorizontalAlignment="Center" Spacing="8" Orientation="Horizontal">
                 <FontIcon Glyph="&#xE8E5;" FontSize="28" VerticalAlignment="Center"/>
-                <TextBlock Text="Trascina qui un file CSV" VerticalAlignment="Center" FontWeight="SemiBold"/>
-                <TextBlock Text=" oppure " VerticalAlignment="Center" Opacity="0.6"/>
-                <Button Content="Sfoglia file..." Click="BrowseButton_Click" VerticalAlignment="Center"/>
+                <TextBlock Text="Drop a CSV file here" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                <TextBlock Text=" or " VerticalAlignment="Center" Opacity="0.6"/>
+                <Button Content="Browse files..." Click="BrowseButton_Click" VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
 
-        <!-- ============================================ -->
-        <!-- SIDEBAR (left column)                        -->
-        <!-- ============================================ -->
+        <!-- SIDEBAR -->
         <Border Grid.Row="2" Grid.Column="0"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -58,16 +52,14 @@
             <ScrollViewer>
                 <StackPanel Spacing="16">
 
-                    <!-- File details -->
                     <StackPanel Spacing="4">
                         <TextBlock Text="File details" FontWeight="SemiBold" Opacity="0.9"/>
-                        <TextBlock x:Name="FileNameText" Text="Nessun file caricato" Opacity="0.85" TextWrapping="Wrap"/>
+                        <TextBlock x:Name="FileNameText" Text="No file loaded" Opacity="0.85" TextWrapping="Wrap"/>
                         <TextBlock x:Name="FileStatsText" Opacity="0.7" FontSize="12"/>
                     </StackPanel>
 
                     <Border Background="{ThemeResource CardStrokeColorDefaultBrush}" Height="1" Opacity="0.4"/>
 
-                    <!-- Override controls -->
                     <StackPanel Spacing="12">
                         <TextBlock Text="Format" FontWeight="SemiBold" Opacity="0.9"/>
 
@@ -113,7 +105,6 @@
 
                     <Border Background="{ThemeResource CardStrokeColorDefaultBrush}" Height="1" Opacity="0.4"/>
 
-                    <!-- Auto-detection info -->
                     <StackPanel Spacing="4">
                         <TextBlock Text="Auto-detection" FontWeight="SemiBold" Opacity="0.9"/>
                         <TextBlock x:Name="DetectionInfoText"
@@ -127,13 +118,10 @@
             </ScrollViewer>
         </Border>
 
-        <!-- ============================================ -->
-        <!-- MAIN CONTENT — Tabs (right column)           -->
-        <!-- ============================================ -->
+        <!-- MAIN CONTENT -->
         <Grid Grid.Row="2" Grid.Column="1">
             <Pivot x:Name="MainPivot">
 
-                <!-- ─── Preview ─── -->
                 <PivotItem Header="Preview">
                     <controls:DataGrid x:Name="PreviewGrid"
                                        AutoGenerateColumns="False"
@@ -142,7 +130,6 @@
                                        HeadersVisibility="Column"/>
                 </PivotItem>
 
-                <!-- ─── Statistics ─── -->
                 <PivotItem Header="Statistics">
                     <controls:DataGrid x:Name="StatsGrid"
                                        AutoGenerateColumns="False"
@@ -162,14 +149,10 @@
                     </controls:DataGrid>
                 </PivotItem>
 
-                <!-- ─── Operations + Export ─── -->
                 <PivotItem Header="Operations">
                     <ScrollViewer>
                         <StackPanel Spacing="16" Padding="0,8,0,0">
 
-                            <!-- ============================ -->
-                            <!-- CLEANUP                       -->
-                            <!-- ============================ -->
                             <TextBlock Text="Cleanup operations"
                                        FontWeight="SemiBold"
                                        Opacity="0.9"/>
@@ -226,9 +209,6 @@
                             <Border Background="{ThemeResource CardStrokeColorDefaultBrush}"
                                     Height="1" Opacity="0.4" Margin="0,8"/>
 
-                            <!-- ============================ -->
-                            <!-- EXPORT                        -->
-                            <!-- ============================ -->
                             <TextBlock Text="Export"
                                        FontWeight="SemiBold"
                                        Opacity="0.9"/>

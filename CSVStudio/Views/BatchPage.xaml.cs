@@ -81,7 +81,7 @@ namespace CSVStudio.Views
             }
             catch (Exception ex)
             {
-                Log($"❌ Errore caricamento cartella: {ex.Message}");
+                Log($"❌ Folder load error: {ex.Message}");
             }
         }
 
@@ -99,7 +99,7 @@ namespace CSVStudio.Views
         private void FilesArea_DragOver(object sender, DragEventArgs e)
         {
             e.AcceptedOperation = DataPackageOperation.Copy;
-            e.DragUIOverride.Caption = "Aggiungi al batch";
+            e.DragUIOverride.Caption = "Add to batch";
             e.DragUIOverride.IsCaptionVisible = true;
         }
 
@@ -149,14 +149,14 @@ namespace CSVStudio.Views
         {
             if (_jobs.Count == 0)
             {
-                Log("⚠ Nessun file aggiunto.");
+                Log("⚠ No files added.");
                 return;
             }
 
             var selectedOps = GetSelectedOperations();
             if (selectedOps.Count == 0)
             {
-                Log("⚠ Nessuna operazione selezionata.");
+                Log("⚠ No operations selected.");
                 return;
             }
 
@@ -171,7 +171,7 @@ namespace CSVStudio.Views
             BatchProgress.Value = 0;
             BatchProgress.Maximum = _jobs.Count;
             RunButton.IsEnabled = false;
-            Log($"▶ Avvio batch su {_jobs.Count} file con {selectedOps.Count} operazioni...");
+            Log($"▶ Starting batch on {_jobs.Count} files with {selectedOps.Count} operations...");
 
             int completed = 0;
 
@@ -204,11 +204,11 @@ namespace CSVStudio.Views
 
                 int ok = _jobs.Count(j => j.Status == BatchJobStatus.Success);
                 int fail = _jobs.Count(j => j.Status == BatchJobStatus.Failed);
-                Log($"✔ Batch completato: {ok} OK, {fail} errori.");
+                Log($"✔ Batch completed: {ok} OK, {fail} errors.");
             }
             catch (Exception ex)
             {
-                Log($"❌ Errore globale: {ex.Message}");
+                Log($"❌ Global error: {ex.Message}");
             }
             finally
             {
@@ -270,8 +270,8 @@ namespace CSVStudio.Views
         private void UpdateFilesCount()
         {
             FilesCountText.Text = _jobs.Count == 0
-                ? "Nessun file"
-                : $"{_jobs.Count} file in coda";
+                ? "No files"
+                : $"{_jobs.Count} files in queue";
         }
 
         private void Log(string line)

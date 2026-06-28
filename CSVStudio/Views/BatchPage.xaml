@@ -17,18 +17,14 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- ============================================ -->
-        <!-- HEADER                                       -->
-        <!-- ============================================ -->
+        <!-- HEADER -->
         <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Spacing="4">
             <TextBlock Text="Batch processing" FontSize="28" FontWeight="SemiBold"/>
-            <TextBlock Text="Applica le stesse operazioni a più file CSV contemporaneamente."
+            <TextBlock Text="Apply the same operations to multiple CSV files at once."
                        Opacity="0.7"/>
         </StackPanel>
 
-        <!-- ============================================ -->
-        <!-- SIDEBAR (operations + output)                -->
-        <!-- ============================================ -->
+        <!-- SIDEBAR -->
         <Border Grid.Row="1" Grid.Column="0"
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -38,11 +34,10 @@
             <ScrollViewer>
                 <StackPanel Spacing="16">
 
-                    <!-- Operations -->
                     <StackPanel Spacing="8">
                         <TextBlock Text="Operations to apply"
                                    FontWeight="SemiBold" Opacity="0.9"/>
-                        <TextBlock Text="Seleziona le operazioni da eseguire in sequenza."
+                        <TextBlock Text="Select operations to run in sequence."
                                    FontSize="12" Opacity="0.7"
                                    TextWrapping="Wrap"/>
 
@@ -60,7 +55,6 @@
                     <Border Background="{ThemeResource CardStrokeColorDefaultBrush}"
                             Height="1" Opacity="0.4"/>
 
-                    <!-- Output -->
                     <StackPanel Spacing="8">
                         <TextBlock Text="Output"
                                    FontWeight="SemiBold" Opacity="0.9"/>
@@ -101,9 +95,7 @@
             </ScrollViewer>
         </Border>
 
-        <!-- ============================================ -->
-        <!-- MAIN: files + progress + log                 -->
-        <!-- ============================================ -->
+        <!-- MAIN -->
         <Grid Grid.Row="1" Grid.Column="1" RowSpacing="12">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -112,7 +104,6 @@
                 <RowDefinition Height="200"/>
             </Grid.RowDefinitions>
 
-            <!-- Add buttons -->
             <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
                 <Button Content="Add files..." Click="AddFiles_Click"/>
                 <Button Content="Add folder..." Click="AddFolder_Click"/>
@@ -123,7 +114,6 @@
                            Opacity="0.7"/>
             </StackPanel>
 
-            <!-- Files DataGrid -->
             <Border Grid.Row="1"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -146,14 +136,12 @@
                 </controls:DataGrid>
             </Border>
 
-            <!-- Progress -->
             <ProgressBar x:Name="BatchProgress"
                          Grid.Row="2"
                          Minimum="0"
                          Maximum="100"
                          Value="0"/>
 
-            <!-- Log -->
             <Border Grid.Row="3"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"

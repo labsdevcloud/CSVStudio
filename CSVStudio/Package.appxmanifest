@@ -33,7 +33,7 @@
   <Applications>
     <Application Id="App"
       Executable="$targetnametoken$.exe"
-      EntryPoint="CSVStudio.App">
+     EntryPoint="$targetentrypoint$">
       <uap:VisualElements
         DisplayName="CSVStudio"
         Description="Smart CSV toolkit for Windows. Detect, clean, and export CSV files with a few clicks. 100% offline."
