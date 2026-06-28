@@ -14,6 +14,20 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Assets\Square150x150Logo.scale-125.png" />
+    <None Remove="Assets\Square150x150Logo.scale-150.png" />
+    <None Remove="Assets\Square310x310Logo.scale-100.png" />
+    <None Remove="Assets\Square310x310Logo.scale-125.png" />
+    <None Remove="Assets\Square310x310Logo.scale-150.png" />
+    <None Remove="Assets\Square310x310Logo.scale-200.png" />
+    <None Remove="Assets\Square310x310Logo.scale-400.png" />
+    <None Remove="Assets\Square71x71Logo.scale-100.png" />
+    <None Remove="Assets\Square71x71Logo.scale-125.png" />
+    <None Remove="Assets\Square71x71Logo.scale-150.png" />
+    <None Remove="Assets\Square71x71Logo.scale-200.png" />
+    <None Remove="Assets\Square71x71Logo.scale-400.png" />
+    <None Remove="Assets\Wide310x150Logo.scale-125.png" />
+    <None Remove="Assets\Wide310x150Logo.scale-150.png" />
     <None Remove="Views\BatchPage.xaml" />
     <None Remove="Views\SettingsPage.xaml" />
   </ItemGroup>
@@ -24,7 +38,6 @@
     <Content Include="Assets\Square150x150Logo.scale-200.png" />
     <Content Include="Assets\Square44x44Logo.scale-200.png" />
     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
 
