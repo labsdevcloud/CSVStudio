@@ -9,7 +9,9 @@
     <ScrollViewer Padding="24">
         <StackPanel Spacing="24" MaxWidth="640" HorizontalAlignment="Left">
 
-            <!-- Header -->
+            <!-- ───────────────── -->
+            <!-- HEADER            -->
+            <!-- ───────────────── -->
             <StackPanel Spacing="4">
                 <TextBlock Text="Settings" FontSize="28" FontWeight="SemiBold"/>
                 <TextBlock Text="Customize CSV Studio to your workflow."
@@ -75,13 +77,19 @@
 
                         <StackPanel Spacing="6">
                             <HyperlinkButton Content="📖  Documentation"
-                                             NavigateUri="https://github.com/labsdev/csv-studio"
+                                             NavigateUri="https://github.com/labsdevcloud/CSVStudio"
                                              Padding="0"/>
                             <HyperlinkButton Content="💬  Send feedback"
-                                             NavigateUri="mailto:support@labsdev.example?subject=CSV%20Studio%20feedback"
+                                             Click="SendFeedback_Click"
+                                             Padding="0"/>
+                            <HyperlinkButton Content="🛟  Support"
+                                             NavigateUri="https://github.com/labsdevcloud/CSVStudio/blob/master/SUPPORT.md"
                                              Padding="0"/>
                             <HyperlinkButton Content="🔒  Privacy policy"
-                                             NavigateUri="https://labsdev.example/privacy"
+                                             NavigateUri="https://github.com/labsdevcloud/CSVStudio/blob/master/PRIVACY.md"
+                                             Padding="0"/>
+                            <HyperlinkButton Content="🐛  Report an issue"
+                                             NavigateUri="https://github.com/labsdevcloud/CSVStudio/issues"
                                              Padding="0"/>
                         </StackPanel>
                     </StackPanel>

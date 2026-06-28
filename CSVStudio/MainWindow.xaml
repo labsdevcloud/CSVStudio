@@ -28,12 +28,6 @@
                         <SymbolIcon Symbol="AllApps"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-
-                <NavigationViewItem Content="Recipes" Tag="recipes">
-                    <NavigationViewItem.Icon>
-                        <SymbolIcon Symbol="List"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
             </NavigationView.MenuItems>
 
             <Frame x:Name="ContentFrame"/>

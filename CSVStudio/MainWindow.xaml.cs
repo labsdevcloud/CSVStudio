@@ -42,9 +42,7 @@ namespace CSVStudio
                         ContentFrame.Navigate(typeof(BatchPage));
                         break;
 
-                    case "recipes":
-                        // Future Step 8: ContentFrame.Navigate(typeof(RecipesPage));
-                        break;
+
                 }
             }
         }
