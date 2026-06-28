@@ -1,3 +1,4 @@
+using CSVStudio.Services;
 using CSVStudio.Views;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -6,7 +7,6 @@ namespace CSVStudio
 {
     /// <summary>
     /// Finestra principale dell'applicazione.
-    /// Contiene la NavigationView e gestisce la navigazione tra le pagine.
     /// </summary>
     public sealed partial class MainWindow : Window
     {
@@ -14,18 +14,19 @@ namespace CSVStudio
         {
             this.InitializeComponent();
 
+            // Inizializza tema persistente
+            if (this.Content is FrameworkElement root)
+                ThemeService.Initialize(root);
+
             // Pagina di partenza
             ContentFrame.Navigate(typeof(HomePage));
         }
 
-        /// <summary>
-        /// Gestisce il cambio di voce nella NavigationView della sidebar.
-        /// </summary>
         private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
             if (args.IsSettingsSelected)
             {
-                // Future: ContentFrame.Navigate(typeof(SettingsPage));
+                ContentFrame.Navigate(typeof(SettingsPage));
                 return;
             }
 
@@ -42,7 +43,7 @@ namespace CSVStudio
                         break;
 
                     case "recipes":
-                        // Future step 8: ContentFrame.Navigate(typeof(RecipesPage));
+                        // Future Step 8: ContentFrame.Navigate(typeof(RecipesPage));
                         break;
                 }
             }

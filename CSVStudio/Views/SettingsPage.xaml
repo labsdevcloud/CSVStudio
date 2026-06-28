@@ -1,0 +1,120 @@
+<Page
+    x:Class="CSVStudio.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer Padding="24">
+        <StackPanel Spacing="24" MaxWidth="640" HorizontalAlignment="Left">
+
+            <!-- Header -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="Settings" FontSize="28" FontWeight="SemiBold"/>
+                <TextBlock Text="Customize CSV Studio to your workflow."
+                           Opacity="0.7"/>
+            </StackPanel>
+
+            <!-- ───────────────── -->
+            <!-- APPEARANCE        -->
+            <!-- ───────────────── -->
+            <StackPanel Spacing="8">
+                <TextBlock Text="Appearance" FontWeight="SemiBold" Opacity="0.9"/>
+
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Theme" FontWeight="SemiBold"/>
+                        <TextBlock Text="Choose how CSV Studio looks. Match Windows or pick your favorite."
+                                   Opacity="0.7" FontSize="12"/>
+
+                        <RadioButtons x:Name="ThemeRadios"
+                                      SelectionChanged="ThemeRadios_SelectionChanged"
+                                      Margin="0,8,0,0">
+                            <x:String>System default</x:String>
+                            <x:String>Light</x:String>
+                            <x:String>Dark</x:String>
+                        </RadioButtons>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- ───────────────── -->
+            <!-- ABOUT             -->
+            <!-- ───────────────── -->
+            <StackPanel Spacing="8">
+                <TextBlock Text="About" FontWeight="SemiBold" Opacity="0.9"/>
+
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <StackPanel Spacing="12">
+
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="CSV Studio" FontSize="22" FontWeight="SemiBold"/>
+                            <TextBlock Text="Smart CSV toolkit for Windows"
+                                       Opacity="0.7" FontSize="13"/>
+                        </StackPanel>
+
+                        <StackPanel Spacing="2">
+                            <TextBlock x:Name="VersionText"
+                                       Text="Version 1.0.0"
+                                       Opacity="0.85" FontSize="13"/>
+                            <TextBlock Text="© 2026 LabsDev"
+                                       Opacity="0.7" FontSize="13"/>
+                        </StackPanel>
+
+                        <Border Background="{ThemeResource CardStrokeColorDefaultBrush}"
+                                Height="1" Opacity="0.4"/>
+
+                        <StackPanel Spacing="6">
+                            <HyperlinkButton Content="📖  Documentation"
+                                             NavigateUri="https://github.com/labsdev/csv-studio"
+                                             Padding="0"/>
+                            <HyperlinkButton Content="💬  Send feedback"
+                                             NavigateUri="mailto:support@labsdev.example?subject=CSV%20Studio%20feedback"
+                                             Padding="0"/>
+                            <HyperlinkButton Content="🔒  Privacy policy"
+                                             NavigateUri="https://labsdev.example/privacy"
+                                             Padding="0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- ───────────────── -->
+            <!-- ADVANCED          -->
+            <!-- ───────────────── -->
+            <StackPanel Spacing="8">
+                <TextBlock Text="Advanced" FontWeight="SemiBold" Opacity="0.9"/>
+
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Preview row limit" FontWeight="SemiBold"/>
+                        <TextBlock Text="Number of rows shown in the preview when loading a CSV."
+                                   Opacity="0.7" FontSize="12"/>
+                        <NumberBox x:Name="PreviewLimitBox"
+                                   Value="1000"
+                                   Minimum="100"
+                                   Maximum="10000"
+                                   SpinButtonPlacementMode="Compact"
+                                   HorizontalAlignment="Left"
+                                   Width="160"
+                                   ValueChanged="PreviewLimitBox_ValueChanged"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>
