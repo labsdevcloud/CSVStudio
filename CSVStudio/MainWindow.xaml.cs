@@ -2,6 +2,7 @@ using CSVStudio.Services;
 using CSVStudio.Views;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using System;
 
 namespace CSVStudio
@@ -14,6 +15,15 @@ namespace CSVStudio
         public MainWindow()
         {
             this.InitializeComponent();
+
+            // Sfondo Mica (Windows 11): materiale traslucido moderno.
+            // Attivo solo dove supportato; altrimenti resta lo sfondo a tema del Grid.
+            if (Microsoft.UI.Composition.SystemBackdrops.MicaController.IsSupported())
+            {
+                this.SystemBackdrop = new MicaBackdrop();
+                if (this.Content is Grid rootGrid)
+                    rootGrid.Background = null;   // lascia trasparire la Mica
+            }
 
             // Icona della finestra (barra del titolo + taskbar)
             // Percorso ASSOLUTO: con il profilo Package la working dir non è quella dell'app
