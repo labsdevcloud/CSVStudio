@@ -12,6 +12,7 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <NavigationView x:Name="NavView"
                         PaneDisplayMode="Left"
+                        OpenPaneLength="200"
                         IsBackButtonVisible="Collapsed"
                         IsSettingsVisible="True"
                         SelectionChanged="NavView_SelectionChanged">

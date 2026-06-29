@@ -22,7 +22,7 @@ namespace CSVStudio.Services.Operations
 
         public string IconGlyph => "\uE8D2"; // Font icon
 
-        public string Description => "Trasforma le celle testuali con il case scelto.";
+        public string Description => "Transforms text cells to the selected case.";
 
         public CsvOperationResult Execute(CsvDataset dataset)
         {

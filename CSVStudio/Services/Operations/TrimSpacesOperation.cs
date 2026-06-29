@@ -8,7 +8,7 @@ namespace CSVStudio.Services.Operations
     {
         public string Name => "Trim spaces";
         public string IconGlyph => "\uE8C8"; // Edit
-        public string Description => "Rimuove spazi iniziali e finali da ogni cella.";
+        public string Description => "Removes leading and trailing spaces from every cell.";
 
         public CsvOperationResult Execute(CsvDataset dataset)
         {

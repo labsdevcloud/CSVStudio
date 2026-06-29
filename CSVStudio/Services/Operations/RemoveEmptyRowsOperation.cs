@@ -8,7 +8,7 @@ namespace CSVStudio.Services.Operations
     {
         public string Name => "Remove empty rows";
         public string IconGlyph => "\uE74D"; // Delete
-        public string Description => "Elimina le righe in cui tutte le celle sono vuote.";
+        public string Description => "Removes rows where every cell is empty.";
 
         public CsvOperationResult Execute(CsvDataset dataset)
         {

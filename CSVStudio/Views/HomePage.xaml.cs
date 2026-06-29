@@ -349,7 +349,7 @@ namespace CSVStudio.Views
             if (_currentInfo != null)
             {
                 FileStatsText.Text =
-                    $"{_currentDataset.RowCount} righe • {_currentDataset.ColumnCount} colonne • " +
+                    $"{_currentDataset.RowCount} rows • {_currentDataset.ColumnCount} columns • " +
                     $"{FormatSize(_currentInfo.FileSizeBytes)}";
             }
         }
@@ -752,7 +752,7 @@ namespace CSVStudio.Views
 
             if (_currentInfo != null)
                 FileStatsText.Text =
-                    $"{_currentDataset.RowCount} righe • {_currentDataset.ColumnCount} colonne • " +
+                    $"{_currentDataset.RowCount} rows • {_currentDataset.ColumnCount} columns • " +
                     $"{FormatSize(_currentInfo.FileSizeBytes)}";
         }
 
@@ -776,7 +776,7 @@ namespace CSVStudio.Views
         {
             if (_currentDataset.Rows.Count == 0)
             {
-                ShowInfoBar("Carica prima un file CSV.", InfoBarSeverity.Warning);
+                ShowInfoBar("Load a CSV file first.", InfoBarSeverity.Warning);
                 return;
             }
 

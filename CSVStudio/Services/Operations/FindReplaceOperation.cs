@@ -14,7 +14,7 @@ namespace CSVStudio.Services.Operations
     {
         public string Name => "Find & Replace";
         public string IconGlyph => "\uE721"; // Search
-        public string Description => "Cerca e sostituisce testo in tutte le celle.";
+        public string Description => "Finds and replaces text across all cells.";
 
         public string Find { get; set; } = string.Empty;
         public string Replace { get; set; } = string.Empty;
@@ -28,7 +28,7 @@ namespace CSVStudio.Services.Operations
                 return new CsvOperationResult
                 {
                     Dataset = dataset,
-                    Summary = "Niente da cercare.",
+                    Summary = "Nothing to find.",
                     Success = false
                 };
             }

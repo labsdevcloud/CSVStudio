@@ -9,7 +9,7 @@ namespace CSVStudio.Services.Operations
     {
         public string Name => "Remove duplicate columns";
         public string IconGlyph => "\uE74D"; // Delete
-        public string Description => "Mantiene una sola colonna per ogni header duplicato.";
+        public string Description => "Keeps only one column for each duplicate header.";
 
         public CsvOperationResult Execute(CsvDataset dataset)
         {
@@ -29,7 +29,7 @@ namespace CSVStudio.Services.Operations
                 return new CsvOperationResult
                 {
                     Dataset = dataset,
-                    Summary = "Nessuna colonna duplicata trovata."
+                    Summary = "No duplicate columns found."
                 };
             }
 

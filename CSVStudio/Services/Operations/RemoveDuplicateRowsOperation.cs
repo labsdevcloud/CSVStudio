@@ -8,7 +8,7 @@ namespace CSVStudio.Services.Operations
     {
         public string Name => "Remove duplicate rows";
         public string IconGlyph => "\uE8C8"; // Copy/duplicate icon family
-        public string Description => "Elimina righe identiche mantenendo la prima occorrenza.";
+        public string Description => "Removes identical rows, keeping the first occurrence.";
 
         public CsvOperationResult Execute(CsvDataset dataset)
         {
