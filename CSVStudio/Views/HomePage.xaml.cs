@@ -46,6 +46,7 @@ namespace CSVStudio.Views
         private TextBox? _editingTextBox;
         private IDictionary<string, object>? _editingRow;
         private string? _editingKey;
+        private string? _editingOldValue;   // valore della cella PRIMA della modifica (per undo)
 
         // Undo / Redo: snapshot dell'intero dataset (pila limitata)
         private readonly List<CsvDataset> _undo = new();
@@ -710,6 +711,12 @@ namespace CSVStudio.Views
             _editingRow = e.Row?.DataContext as IDictionary<string, object>;
             _editColumnKeys.TryGetValue(e.Column, out _editingKey);
             _editingTextBox = e.EditingElement as TextBox ?? FindChildTextBox(e.EditingElement);
+
+            // Memorizzo il valore PRIMA della modifica: serve a costruire lo snapshot di undo
+            // anche se il binding scrivesse il nuovo valore durante la digitazione.
+            _editingOldValue = (_editingRow != null && _editingKey != null
+                                && _editingRow.TryGetValue(_editingKey, out var cur))
+                ? cur?.ToString() ?? "" : "";
         }
 
         private void EditGrid_CellEditEnded(object sender, DataGridCellEditEndedEventArgs e)
@@ -719,17 +726,22 @@ namespace CSVStudio.Views
             if (e.EditAction == DataGridEditAction.Commit
                 && _editingRow != null && _editingKey != null && _editingTextBox != null)
             {
-                var oldVal = _editingRow.TryGetValue(_editingKey, out var ov) ? ov?.ToString() ?? "" : "";
-                if (oldVal != _editingTextBox.Text)
+                var newVal = _editingTextBox.Text;
+                var oldVal = _editingOldValue ?? "";
+                if (oldVal != newVal)
                 {
+                    // Garantisco che lo snapshot contenga il valore PRECEDENTE:
+                    // ripristino il vecchio, scatto lo snapshot, poi applico il nuovo.
+                    _editingRow[_editingKey] = oldVal;
                     PushUndo();
-                    _editingRow[_editingKey] = _editingTextBox.Text;
+                    _editingRow[_editingKey] = newVal;
                 }
             }
 
             _editingTextBox = null;
             _editingRow = null;
             _editingKey = null;
+            _editingOldValue = null;
 
             // Aggiorno statistiche e conteggio per riflettere la modifica.
             var stats = _statistics.Compute(
