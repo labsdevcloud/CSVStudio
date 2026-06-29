@@ -2,6 +2,7 @@ using CSVStudio.Services;
 using CSVStudio.Views;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
 
 namespace CSVStudio
 {
@@ -13,6 +14,11 @@ namespace CSVStudio
         public MainWindow()
         {
             this.InitializeComponent();
+
+            // Icona della finestra (barra del titolo + taskbar)
+            // Percorso ASSOLUTO: con il profilo Package la working dir non è quella dell'app
+            var iconPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico");
+            AppWindow.SetIcon(iconPath);
 
             // Inizializza tema persistente
             if (this.Content is FrameworkElement root)
@@ -41,8 +47,6 @@ namespace CSVStudio
                     case "batch":
                         ContentFrame.Navigate(typeof(BatchPage));
                         break;
-
-
                 }
             }
         }

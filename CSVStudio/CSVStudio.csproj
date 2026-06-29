@@ -17,8 +17,16 @@
 		<!-- Usiamo il nostro Program.cs custom con [MTAThread] -->
 		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 	</PropertyGroup>
+	<ItemGroup>
+	  <Content Remove="Assets\Square44x44Logo.altform-lightunplated_targetsize-16.png" />
+	  <Content Remove="Assets\Square44x44Logo.altform-lightunplated_targetsize-24.png" />
+	  <Content Remove="Assets\Square44x44Logo.altform-lightunplated_targetsize-256.png" />
+	  <Content Remove="Assets\Square44x44Logo.altform-lightunplated_targetsize-32.png" />
+	  <Content Remove="Assets\Square44x44Logo.altform-lightunplated_targetsize-48.png" />
+	</ItemGroup>
 
 	<ItemGroup>
+		<None Remove="Assets\AppIcon.ico" />
 		<None Remove="Views\BatchPage.xaml" />
 		<None Remove="Views\SettingsPage.xaml" />
 	</ItemGroup>
