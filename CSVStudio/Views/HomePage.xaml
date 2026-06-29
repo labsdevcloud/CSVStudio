@@ -196,6 +196,39 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
 
+                            <TextBlock Text="Find &amp; Replace"
+                                       FontWeight="SemiBold"
+                                       Opacity="0.9"
+                                       Margin="0,8,0,0"/>
+
+                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Padding="16">
+                                <StackPanel Spacing="12">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Find" FontSize="12" Opacity="0.7"/>
+                                        <TextBox x:Name="FindBox" HorizontalAlignment="Stretch"/>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Replace with" FontSize="12" Opacity="0.7"/>
+                                        <TextBox x:Name="ReplaceBox" HorizontalAlignment="Stretch"/>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Spacing="16">
+                                        <CheckBox x:Name="MatchCaseCheck" Content="Match case"/>
+                                        <CheckBox x:Name="UseRegexCheck" Content="Use regex"/>
+                                    </StackPanel>
+
+                                    <Button Content="Apply Find &amp; Replace"
+                                            Style="{ThemeResource AccentButtonStyle}"
+                                            HorizontalAlignment="Stretch"
+                                            Click="FindReplaceApply_Click"/>
+                                </StackPanel>
+                            </Border>
+
                             <InfoBar x:Name="OperationResultBar"
                                      IsOpen="False"
                                      Severity="Success"

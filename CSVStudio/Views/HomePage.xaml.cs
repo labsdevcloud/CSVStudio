@@ -311,6 +311,49 @@ namespace CSVStudio.Views
             }
         }
 
+        private void FindReplaceApply_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentDataset.Rows.Count == 0)
+            {
+                ShowInfoBar("Load a CSV file first.", InfoBarSeverity.Warning);
+                return;
+            }
+            if (string.IsNullOrEmpty(FindBox.Text))
+            {
+                ShowInfoBar("Enter text to find.", InfoBarSeverity.Warning);
+                return;
+            }
+
+            var op = new FindReplaceOperation
+            {
+                Find = FindBox.Text,
+                Replace = ReplaceBox.Text ?? string.Empty,
+                MatchCase = MatchCaseCheck.IsChecked ?? false,
+                UseRegex = UseRegexCheck.IsChecked ?? false
+            };
+
+            try
+            {
+                var result = op.Execute(_currentDataset);
+                if (result.Success)
+                {
+                    PushUndo();
+                    _currentDataset = result.Dataset;
+                    RefreshDataView();
+                    ShowInfoBar($"{op.Name}: {result.Summary}", InfoBarSeverity.Success);
+                }
+                else
+                {
+                    ShowInfoBar($"{op.Name}: {result.Summary}", InfoBarSeverity.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Es. pattern regex non valido
+                ShowInfoBar($"Find & Replace error: {ex.Message}", InfoBarSeverity.Error);
+            }
+        }
+
         private void ResetButton_Click(object sender, RoutedEventArgs e)
         {
             if (_originalDataset is null)
