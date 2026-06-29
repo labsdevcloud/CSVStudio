@@ -7,6 +7,7 @@ using CsvHelper.Configuration;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Markup;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -39,6 +40,12 @@ namespace CSVStudio.Views
         // Dataset corrente (modificato dalle operazioni) e originale (per Reset)
         private CsvDataset _currentDataset = new();
         private CsvDataset? _originalDataset;
+
+        // Editing: mappa colonna→chiave + cattura dell'editor corrente (per il write-back manuale)
+        private readonly Dictionary<DataGridColumn, string> _editColumnKeys = new();
+        private TextBox? _editingTextBox;
+        private IDictionary<string, object>? _editingRow;
+        private string? _editingKey;
 
         // Operazioni disponibili
         private readonly List<ICsvOperation> _availableOperations = new()
@@ -202,38 +209,30 @@ namespace CSVStudio.Views
             info.HasDuplicateHeaders = duplicates.Count > 0;
             info.HasEmptyHeaders = headers.Any(string.IsNullOrWhiteSpace);
 
-            // Colonne DataGrid
-            PreviewGrid.Columns.Clear();
+            // Colonne DataGrid (Preview = sola lettura, Edit = modificabile)
             var uniqueKeys = MakeUniqueKeys(headers);
-
-            for (int i = 0; i < headers.Length; i++)
-            {
-                var col = new DataGridTextColumn
-                {
-                    Header = headers[i],
-                    Binding = new Binding { Path = new PropertyPath($"[{uniqueKeys[i]}]") }
-                };
-                PreviewGrid.Columns.Add(col);
-            }
+            BuildColumns(PreviewGrid, headers, uniqueKeys, editable: false);
+            BuildColumns(EditGrid, headers, uniqueKeys, editable: true);
 
             // Righe
             var rows = new List<IDictionary<string, object>>();
             int rowCount = 0;
 
+            // Opzione B: carichiamo l'INTERO file (niente limite di 1000 righe),
+            // così l'editing e l'export coprono tutti i dati.
             if (info.HasHeader)
             {
                 while (csv.Read())
                 {
                     AddRow(csv, headers, uniqueKeys, rows);
                     rowCount++;
-                    if (rowCount >= 1000) break;
                 }
             }
             else
             {
                 AddRow(csv, headers, uniqueKeys, rows);
                 rowCount++;
-                while (csv.Read() && rowCount < 1000)
+                while (csv.Read())
                 {
                     AddRow(csv, headers, uniqueKeys, rows);
                     rowCount++;
@@ -244,6 +243,7 @@ namespace CSVStudio.Views
             info.ColumnCount = headers.Length;
 
             PreviewGrid.ItemsSource = rows;
+            EditGrid.ItemsSource = rows;
 
             // Statistiche
             var stats = _statistics.Compute(headers, uniqueKeys, rows);
@@ -319,9 +319,11 @@ namespace CSVStudio.Views
             if (PreviewGrid.Columns.Count != _currentDataset.Headers.Length)
                 RebuildPreviewColumns();
 
-            // Refresh preview
+            // Refresh preview + edit (stessa sorgente dati)
             PreviewGrid.ItemsSource = null;
             PreviewGrid.ItemsSource = _currentDataset.Rows;
+            EditGrid.ItemsSource = null;
+            EditGrid.ItemsSource = _currentDataset.Rows;
 
             // Refresh stats
             var stats = _statistics.Compute(
@@ -341,16 +343,62 @@ namespace CSVStudio.Views
 
         private void RebuildPreviewColumns()
         {
-            PreviewGrid.Columns.Clear();
-            for (int i = 0; i < _currentDataset.Headers.Length; i++)
+            BuildColumns(PreviewGrid, _currentDataset.Headers, _currentDataset.UniqueKeys, editable: false);
+            BuildColumns(EditGrid, _currentDataset.Headers, _currentDataset.UniqueKeys, editable: true);
+        }
+
+        // Costruisce le colonne per una griglia.
+        // - Preview (editable=false): DataGridTextColumn in sola lettura.
+        // - Edit   (editable=true):  DataGridTemplateColumn con TextBox di editing.
+        //   Le colonne sono dinamiche e i dati sono ExpandoObject (binding "a indice"),
+        //   che una DataGridTextColumn NON considera modificabile: serve la template column.
+        private void BuildColumns(DataGrid grid, string[] headers, string[] uniqueKeys, bool editable)
+        {
+            grid.Columns.Clear();
+            if (editable) _editColumnKeys.Clear();
+
+            for (int i = 0; i < headers.Length; i++)
             {
-                var col = new DataGridTextColumn
+                if (editable)
                 {
-                    Header = _currentDataset.Headers[i],
-                    Binding = new Binding { Path = new PropertyPath($"[{_currentDataset.UniqueKeys[i]}]") }
-                };
-                PreviewGrid.Columns.Add(col);
+                    var col = new DataGridTemplateColumn
+                    {
+                        Header = headers[i],
+                        CellTemplate = BuildCellTemplate(uniqueKeys[i], forEditing: false),
+                        CellEditingTemplate = BuildCellTemplate(uniqueKeys[i], forEditing: true)
+                    };
+                    _editColumnKeys[col] = uniqueKeys[i];   // serve al write-back manuale
+                    grid.Columns.Add(col);
+                }
+                else
+                {
+                    grid.Columns.Add(new DataGridTextColumn
+                    {
+                        Header = headers[i],
+                        Binding = new Binding
+                        {
+                            Path = new PropertyPath($"[{uniqueKeys[i]}]"),
+                            Mode = BindingMode.OneWay
+                        }
+                    });
+                }
             }
+        }
+
+        // Crea via XAML il template di cella: TextBlock per la visualizzazione,
+        // TextBox (TwoWay) per la modifica. Le chiavi sono già sanificate
+        // (solo lettere/cifre/underscore), quindi sicure dentro il binding.
+        private static DataTemplate BuildCellTemplate(string key, bool forEditing)
+        {
+            string inner = forEditing
+                ? $"<TextBox Text=\"{{Binding [{key}], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}}\" BorderThickness=\"0\"/>"
+                : $"<TextBlock Text=\"{{Binding [{key}]}}\" VerticalAlignment=\"Center\" Margin=\"12,0,12,0\"/>";
+
+            string xaml =
+                "<DataTemplate xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" " +
+                "xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\">" + inner + "</DataTemplate>";
+
+            return (DataTemplate)XamlReader.Load(xaml);
         }
 
         private void ShowInfoBar(string message, InfoBarSeverity severity)
@@ -358,6 +406,109 @@ namespace CSVStudio.Views
             OperationResultBar.Message = message;
             OperationResultBar.Severity = severity;
             OperationResultBar.IsOpen = true;
+        }
+
+        // ─────────────────────────────────────────────────
+        // EDIT (Opzione B): modifica celle, aggiungi/elimina righe
+        // ─────────────────────────────────────────────────
+        private void AddRowButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentDataset.Headers.Length == 0)
+            {
+                ShowInfoBar("Load a CSV file first.", InfoBarSeverity.Warning);
+                return;
+            }
+
+            // Nuova riga vuota con le stesse chiavi delle colonne
+            var row = new ExpandoObject() as IDictionary<string, object>;
+            foreach (var key in _currentDataset.UniqueKeys)
+                row[key] = string.Empty;
+
+            _currentDataset.Rows.Add(row);
+            RefreshDataView();
+
+            // Subito dopo il refresh la nuova riga non è ancora "realizzata":
+            // selezione/scroll vanno rimandati a dopo il layout e protetti.
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                try
+                {
+                    EditGrid.UpdateLayout();
+                    EditGrid.SelectedItem = row;
+                    EditGrid.ScrollIntoView(row, null);
+                }
+                catch
+                {
+                    // tempistiche di layout della griglia: ignoriamo lo scroll
+                }
+            });
+        }
+
+        private void DeleteRowButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (EditGrid.SelectedItems.Count == 0)
+            {
+                ShowInfoBar("Select one or more rows to delete.", InfoBarSeverity.Warning);
+                return;
+            }
+
+            var toRemove = EditGrid.SelectedItems
+                .Cast<IDictionary<string, object>>()
+                .ToList();
+
+            foreach (var r in toRemove)
+                _currentDataset.Rows.Remove(r);
+
+            RefreshDataView();
+            ShowInfoBar($"{toRemove.Count} row(s) deleted.", InfoBarSeverity.Success);
+        }
+
+        // Cattura il TextBox di modifica quando la cella entra in editing.
+        private void EditGrid_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
+        {
+            _editingRow = e.Row?.DataContext as IDictionary<string, object>;
+            _editColumnKeys.TryGetValue(e.Column, out _editingKey);
+            _editingTextBox = e.EditingElement as TextBox ?? FindChildTextBox(e.EditingElement);
+        }
+
+        private void EditGrid_CellEditEnded(object sender, DataGridCellEditEndedEventArgs e)
+        {
+            // Write-back AFFIDABILE: scriviamo noi il valore nel dato, senza dipendere
+            // dal binding "a indice" dell'ExpandoObject (che non torna nella sorgente).
+            if (e.EditAction == DataGridEditAction.Commit
+                && _editingRow != null && _editingKey != null && _editingTextBox != null)
+            {
+                _editingRow[_editingKey] = _editingTextBox.Text;
+            }
+
+            _editingTextBox = null;
+            _editingRow = null;
+            _editingKey = null;
+
+            // Aggiorno statistiche e conteggio per riflettere la modifica.
+            var stats = _statistics.Compute(
+                _currentDataset.Headers,
+                _currentDataset.UniqueKeys,
+                _currentDataset.Rows);
+            StatsGrid.ItemsSource = stats;
+
+            if (_currentInfo != null)
+                FileStatsText.Text =
+                    $"{_currentDataset.RowCount} righe • {_currentDataset.ColumnCount} colonne • " +
+                    $"{FormatSize(_currentInfo.FileSizeBytes)}";
+        }
+
+        private static TextBox? FindChildTextBox(DependencyObject? parent)
+        {
+            if (parent is TextBox tb) return tb;
+            if (parent == null) return null;
+            int n = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < n; i++)
+            {
+                var found = FindChildTextBox(Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(parent, i));
+                if (found != null) return found;
+            }
+            return null;
         }
 
         // ─────────────────────────────────────────────────
@@ -444,7 +595,7 @@ namespace CSVStudio.Views
         private void UpdateInfoPanels(CsvFileInfo info, List<string> duplicates)
         {
             FileNameText.Text = info.FileName;
-            FileStatsText.Text = $"{info.PreviewRows} rows (preview) • {info.ColumnCount} columns • {FormatSize(info.FileSizeBytes)}";
+            FileStatsText.Text = $"{info.PreviewRows} rows • {info.ColumnCount} columns • {FormatSize(info.FileSizeBytes)}";
 
             var lines = new List<string>
             {
@@ -477,6 +628,8 @@ namespace CSVStudio.Views
             DetectionInfoText.Text = string.Empty;
             PreviewGrid.ItemsSource = null;
             PreviewGrid.Columns.Clear();
+            EditGrid.ItemsSource = null;
+            EditGrid.Columns.Clear();
             StatsGrid.ItemsSource = null;
         }
 

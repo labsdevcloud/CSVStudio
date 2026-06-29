@@ -47,6 +47,8 @@ namespace CSVStudio
                     case "batch":
                         ContentFrame.Navigate(typeof(BatchPage));
                         break;
+
+
                 }
             }
         }

@@ -13,20 +13,12 @@
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<Nullable>enable</Nullable>
 
-		<!-- 👇 Disabilita il Main() auto-generato (STAThread) -->
-		<!-- Usiamo il nostro Program.cs custom con [MTAThread] -->
+		<!-- 👇 Disabilita il Main() auto-generato -->
+		<!-- Usiamo il nostro Program.cs custom con [STAThread] (richiesto da WinUI 3) -->
 		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 	</PropertyGroup>
-	<ItemGroup>
-	  <Content Remove="Assets\Square44x44Logo.altform-lightunplated_targetsize-16.png" />
-	  <Content Remove="Assets\Square44x44Logo.altform-lightunplated_targetsize-24.png" />
-	  <Content Remove="Assets\Square44x44Logo.altform-lightunplated_targetsize-256.png" />
-	  <Content Remove="Assets\Square44x44Logo.altform-lightunplated_targetsize-32.png" />
-	  <Content Remove="Assets\Square44x44Logo.altform-lightunplated_targetsize-48.png" />
-	</ItemGroup>
 
 	<ItemGroup>
-		<None Remove="Assets\AppIcon.ico" />
 		<None Remove="Views\BatchPage.xaml" />
 		<None Remove="Views\SettingsPage.xaml" />
 	</ItemGroup>
@@ -39,6 +31,7 @@
 		<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
 		<Content Include="Assets\StoreLogo.png" />
 		<Content Include="Assets\Wide310x150Logo.scale-200.png" />
+		<Content Include="Assets\AppIcon.ico" />
 	</ItemGroup>
 
 	<ItemGroup>

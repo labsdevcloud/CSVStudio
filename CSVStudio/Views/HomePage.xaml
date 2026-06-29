@@ -265,6 +265,31 @@
                     </ScrollViewer>
                 </PivotItem>
 
+                <PivotItem Header="Edit">
+                    <Grid RowSpacing="12" Padding="0,8,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Button Content="Add row" Click="AddRowButton_Click"/>
+                            <Button Content="Delete selected" Click="DeleteRowButton_Click"/>
+                            <TextBlock VerticalAlignment="Center" Opacity="0.7" FontSize="12"
+                                       Text="Double-click a cell to edit. Changes are included in Export."/>
+                        </StackPanel>
+
+                        <controls:DataGrid x:Name="EditGrid" Grid.Row="1"
+                                           AutoGenerateColumns="False"
+                                           IsReadOnly="False"
+                                           SelectionMode="Extended"
+                                           GridLinesVisibility="All"
+                                           HeadersVisibility="Column"
+                                           PreparingCellForEdit="EditGrid_PreparingCellForEdit"
+                                           CellEditEnded="EditGrid_CellEditEnded"/>
+                    </Grid>
+                </PivotItem>
+
             </Pivot>
         </Grid>
 
