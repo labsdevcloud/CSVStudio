@@ -273,10 +273,42 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                            <Button Content="Add row" Click="AddRowButton_Click"/>
-                            <Button Content="Delete selected" Click="DeleteRowButton_Click"/>
+                            <Button x:Name="UndoButton" Content="Undo" Click="UndoButton_Click" IsEnabled="False">
+                                <Button.KeyboardAccelerators>
+                                    <KeyboardAccelerator Modifiers="Control" Key="Z"/>
+                                </Button.KeyboardAccelerators>
+                            </Button>
+                            <Button x:Name="RedoButton" Content="Redo" Click="RedoButton_Click" IsEnabled="False">
+                                <Button.KeyboardAccelerators>
+                                    <KeyboardAccelerator Modifiers="Control" Key="Y"/>
+                                </Button.KeyboardAccelerators>
+                            </Button>
+                            <Border Width="1" VerticalAlignment="Stretch" Margin="4,2"
+                                    Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
+                            <DropDownButton Content="Add">
+                                <DropDownButton.Flyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem Text="Add Row Above" Click="AddRowAbove_Click"/>
+                                        <MenuFlyoutItem Text="Add Row Below" Click="AddRowBelow_Click"/>
+                                        <MenuFlyoutItem Text="Duplicate Row" Click="DuplicateRow_Click"/>
+                                        <MenuFlyoutSeparator/>
+                                        <MenuFlyoutItem Text="Add Column Before" Click="AddColumnBefore_Click"/>
+                                        <MenuFlyoutItem Text="Add Column After" Click="AddColumnAfter_Click"/>
+                                        <MenuFlyoutItem Text="Duplicate Column" Click="DuplicateColumn_Click"/>
+                                    </MenuFlyout>
+                                </DropDownButton.Flyout>
+                            </DropDownButton>
+                            <Button Content="Rename column" Click="RenameColumn_Click"/>
+                            <DropDownButton Content="Delete">
+                                <DropDownButton.Flyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem Text="Delete Selected Rows" Click="DeleteRowButton_Click"/>
+                                        <MenuFlyoutItem Text="Delete Column" Click="DeleteColumn_Click"/>
+                                    </MenuFlyout>
+                                </DropDownButton.Flyout>
+                            </DropDownButton>
                             <TextBlock VerticalAlignment="Center" Opacity="0.7" FontSize="12"
-                                       Text="Double-click a cell to edit. Changes are included in Export."/>
+                                       Text="Select a row/cell first. Double-click a cell to edit. Changes are included in Export."/>
                         </StackPanel>
 
                         <controls:DataGrid x:Name="EditGrid" Grid.Row="1"

@@ -47,6 +47,11 @@ namespace CSVStudio.Views
         private IDictionary<string, object>? _editingRow;
         private string? _editingKey;
 
+        // Undo / Redo: snapshot dell'intero dataset (pila limitata)
+        private readonly List<CsvDataset> _undo = new();
+        private readonly List<CsvDataset> _redo = new();
+        private const int MaxUndoSteps = 50;
+
         // Operazioni disponibili
         private readonly List<ICsvOperation> _availableOperations = new()
         {
@@ -262,6 +267,11 @@ namespace CSVStudio.Views
             };
             _originalDataset = _currentDataset.Clone();
 
+            // Nuovo file = cronologia azzerata
+            _undo.Clear();
+            _redo.Clear();
+            UpdateUndoRedoButtons();
+
             ApplyButton.IsEnabled = true;
         }
 
@@ -283,6 +293,7 @@ namespace CSVStudio.Views
                     var result = op.Execute(_currentDataset);
                     if (result.Success)
                     {
+                        PushUndo();
                         _currentDataset = result.Dataset;
                         RefreshDataView();
                         ShowInfoBar($"{op.Name}: {result.Summary}", InfoBarSeverity.Success);
@@ -307,6 +318,7 @@ namespace CSVStudio.Views
                 return;
             }
 
+            PushUndo();
             _currentDataset = _originalDataset.Clone();
             RebuildPreviewColumns();
             RefreshDataView();
@@ -409,26 +421,90 @@ namespace CSVStudio.Views
         }
 
         // ─────────────────────────────────────────────────
-        // EDIT (Opzione B): modifica celle, aggiungi/elimina righe
+        // UNDO / REDO (snapshot dell'intero dataset)
         // ─────────────────────────────────────────────────
-        private void AddRowButton_Click(object sender, RoutedEventArgs e)
+        // Da chiamare PRIMA di ogni modifica ai dati.
+        private void PushUndo()
         {
-            if (_currentDataset.Headers.Length == 0)
-            {
-                ShowInfoBar("Load a CSV file first.", InfoBarSeverity.Warning);
-                return;
-            }
+            _undo.Add(_currentDataset.Clone());
+            if (_undo.Count > MaxUndoSteps) _undo.RemoveAt(0);   // scarto il più vecchio
+            _redo.Clear();
+            UpdateUndoRedoButtons();
+        }
 
-            // Nuova riga vuota con le stesse chiavi delle colonne
+        private void UndoButton_Click(object sender, RoutedEventArgs e) => Undo();
+        private void RedoButton_Click(object sender, RoutedEventArgs e) => Redo();
+
+        private void Undo()
+        {
+            if (_undo.Count == 0) return;
+            _redo.Add(_currentDataset.Clone());
+            var snapshot = _undo[_undo.Count - 1];
+            _undo.RemoveAt(_undo.Count - 1);
+            RestoreSnapshot(snapshot);
+            UpdateUndoRedoButtons();
+            ShowInfoBar("Undo.", InfoBarSeverity.Informational);
+        }
+
+        private void Redo()
+        {
+            if (_redo.Count == 0) return;
+            _undo.Add(_currentDataset.Clone());
+            var snapshot = _redo[_redo.Count - 1];
+            _redo.RemoveAt(_redo.Count - 1);
+            RestoreSnapshot(snapshot);
+            UpdateUndoRedoButtons();
+            ShowInfoBar("Redo.", InfoBarSeverity.Informational);
+        }
+
+        private void RestoreSnapshot(CsvDataset snapshot)
+        {
+            _currentDataset = snapshot;
+            RebuildPreviewColumns();
+            RefreshDataView();
+        }
+
+        private void UpdateUndoRedoButtons()
+        {
+            UndoButton.IsEnabled = _undo.Count > 0;
+            RedoButton.IsEnabled = _redo.Count > 0;
+        }
+
+        // ─────────────────────────────────────────────────
+        // EDIT (Opzione B): righe, colonne, rinomina
+        // ─────────────────────────────────────────────────
+
+        // ----- Helpers comuni -----
+        private bool HasData() => _currentDataset.Headers.Length > 0;
+
+        private IDictionary<string, object> NewEmptyRow()
+        {
             var row = new ExpandoObject() as IDictionary<string, object>;
             foreach (var key in _currentDataset.UniqueKeys)
                 row[key] = string.Empty;
+            return row;
+        }
 
-            _currentDataset.Rows.Add(row);
-            RefreshDataView();
+        private int SelectedRowIndex()
+        {
+            if (EditGrid.SelectedItem is IDictionary<string, object> sel)
+                return _currentDataset.Rows.IndexOf(sel);
+            return -1;
+        }
 
-            // Subito dopo il refresh la nuova riga non è ancora "realizzata":
-            // selezione/scroll vanno rimandati a dopo il layout e protetti.
+        private int CurrentColumnIndex()
+        {
+            if (EditGrid.CurrentColumn != null)
+            {
+                int i = EditGrid.Columns.IndexOf(EditGrid.CurrentColumn);
+                if (i >= 0) return i;
+            }
+            return -1;
+        }
+
+        // Selezione/scroll vanno rimandati a dopo il layout (altrimenti "Invalid row index").
+        private void SelectRowDeferred(IDictionary<string, object> row)
+        {
             DispatcherQueue.TryEnqueue(() =>
             {
                 try
@@ -437,11 +513,175 @@ namespace CSVStudio.Views
                     EditGrid.SelectedItem = row;
                     EditGrid.ScrollIntoView(row, null);
                 }
-                catch
-                {
-                    // tempistiche di layout della griglia: ignoriamo lo scroll
-                }
+                catch { /* tempistiche di layout: ignoriamo */ }
             });
+        }
+
+        // ----- RIGHE -----
+        private void AddRowAbove_Click(object sender, RoutedEventArgs e)
+        {
+            if (!HasData()) { ShowInfoBar("Load a CSV file first.", InfoBarSeverity.Warning); return; }
+            PushUndo();
+            int idx = SelectedRowIndex();
+            var row = NewEmptyRow();
+            _currentDataset.Rows.Insert(idx < 0 ? 0 : idx, row);
+            RefreshDataView();
+            SelectRowDeferred(row);
+        }
+
+        private void AddRowBelow_Click(object sender, RoutedEventArgs e)
+        {
+            if (!HasData()) { ShowInfoBar("Load a CSV file first.", InfoBarSeverity.Warning); return; }
+            PushUndo();
+            int idx = SelectedRowIndex();
+            var row = NewEmptyRow();
+            _currentDataset.Rows.Insert(idx < 0 ? _currentDataset.Rows.Count : idx + 1, row);
+            RefreshDataView();
+            SelectRowDeferred(row);
+        }
+
+        private void DuplicateRow_Click(object sender, RoutedEventArgs e)
+        {
+            int idx = SelectedRowIndex();
+            if (idx < 0) { ShowInfoBar("Select a row to duplicate.", InfoBarSeverity.Warning); return; }
+
+            PushUndo();
+            var src = _currentDataset.Rows[idx];
+            var clone = new ExpandoObject() as IDictionary<string, object>;
+            foreach (var kv in src) clone[kv.Key] = kv.Value;
+
+            _currentDataset.Rows.Insert(idx + 1, clone);
+            RefreshDataView();
+            SelectRowDeferred(clone);
+        }
+
+        // ----- COLONNE -----
+        private void AddColumnBefore_Click(object sender, RoutedEventArgs e)
+        {
+            if (!HasData()) { ShowInfoBar("Load a CSV file first.", InfoBarSeverity.Warning); return; }
+            int i = CurrentColumnIndex();
+            InsertColumn(i < 0 ? 0 : i, "New Column", null);
+        }
+
+        private void AddColumnAfter_Click(object sender, RoutedEventArgs e)
+        {
+            if (!HasData()) { ShowInfoBar("Load a CSV file first.", InfoBarSeverity.Warning); return; }
+            int i = CurrentColumnIndex();
+            InsertColumn(i < 0 ? _currentDataset.Headers.Length : i + 1, "New Column", null);
+        }
+
+        private void DuplicateColumn_Click(object sender, RoutedEventArgs e)
+        {
+            int i = CurrentColumnIndex();
+            if (i < 0) { ShowInfoBar("Select a cell in the column to duplicate.", InfoBarSeverity.Warning); return; }
+            InsertColumn(i + 1, _currentDataset.Headers[i] + " (copy)", _currentDataset.UniqueKeys[i]);
+        }
+
+        // Inserisce una colonna all'indice dato; se copyFromKey != null ne copia i valori.
+        private void InsertColumn(int atIndex, string headerLabel, string? copyFromKey)
+        {
+            PushUndo();
+            var headers = _currentDataset.Headers.ToList();
+            var keys = _currentDataset.UniqueKeys.ToList();
+
+            if (atIndex < 0) atIndex = 0;
+            if (atIndex > headers.Count) atIndex = headers.Count;
+
+            string header = MakeUniqueHeader(headerLabel, headers);
+            string key = MakeUniqueKeyFrom(headerLabel, keys);
+
+            headers.Insert(atIndex, header);
+            keys.Insert(atIndex, key);
+
+            foreach (var row in _currentDataset.Rows)
+                row[key] = (copyFromKey != null && row.TryGetValue(copyFromKey, out var v)) ? (v ?? "") : string.Empty;
+
+            _currentDataset.Headers = headers.ToArray();
+            _currentDataset.UniqueKeys = keys.ToArray();
+
+            RebuildPreviewColumns();
+            RefreshDataView();
+            ShowInfoBar("Column added.", InfoBarSeverity.Success);
+        }
+
+        private void DeleteColumn_Click(object sender, RoutedEventArgs e)
+        {
+            int i = CurrentColumnIndex();
+            if (i < 0) { ShowInfoBar("Select a cell in the column to delete.", InfoBarSeverity.Warning); return; }
+            if (_currentDataset.Headers.Length <= 1)
+            {
+                ShowInfoBar("Cannot delete the last column.", InfoBarSeverity.Warning);
+                return;
+            }
+
+            PushUndo();
+            var headers = _currentDataset.Headers.ToList();
+            var keys = _currentDataset.UniqueKeys.ToList();
+            string key = keys[i];
+
+            headers.RemoveAt(i);
+            keys.RemoveAt(i);
+            foreach (var row in _currentDataset.Rows)
+                row.Remove(key);
+
+            _currentDataset.Headers = headers.ToArray();
+            _currentDataset.UniqueKeys = keys.ToArray();
+
+            RebuildPreviewColumns();
+            RefreshDataView();
+            ShowInfoBar("Column deleted.", InfoBarSeverity.Success);
+        }
+
+        // ----- RINOMINA COLONNA -----
+        private async void RenameColumn_Click(object sender, RoutedEventArgs e)
+        {
+            int i = CurrentColumnIndex();
+            if (i < 0) { ShowInfoBar("Select a cell in the column to rename.", InfoBarSeverity.Warning); return; }
+
+            var input = new TextBox { Text = _currentDataset.Headers[i] };
+            var dialog = new ContentDialog
+            {
+                Title = "Rename column",
+                Content = input,
+                PrimaryButtonText = "Rename",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = this.XamlRoot
+            };
+
+            if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+
+            var newName = input.Text?.Trim();
+            if (string.IsNullOrEmpty(newName)) return;
+
+            PushUndo();
+            // Cambia solo l'INTESTAZIONE visibile (e ciò che scrive l'export):
+            // la chiave interna resta invariata, quindi i dati non si toccano.
+            var headers = _currentDataset.Headers.ToArray();
+            headers[i] = newName;
+            _currentDataset.Headers = headers;
+
+            RebuildPreviewColumns();
+            ShowInfoBar("Column renamed.", InfoBarSeverity.Success);
+        }
+
+        // Intestazione VISIBILE non duplicata.
+        private static string MakeUniqueHeader(string baseLabel, List<string> existing)
+        {
+            string label = baseLabel;
+            int n = 1;
+            while (existing.Contains(label)) { n++; label = $"{baseLabel} {n}"; }
+            return label;
+        }
+
+        // Chiave INTERNA univoca (sanificata) per una nuova colonna.
+        private static string MakeUniqueKeyFrom(string baseLabel, List<string> existingKeys)
+        {
+            string baseKey = SanitizeKey(baseLabel);
+            string key = baseKey;
+            int n = 1;
+            while (existingKeys.Contains(key)) { n++; key = $"{baseKey}_{n}"; }
+            return key;
         }
 
         private void DeleteRowButton_Click(object sender, RoutedEventArgs e)
@@ -452,6 +692,7 @@ namespace CSVStudio.Views
                 return;
             }
 
+            PushUndo();
             var toRemove = EditGrid.SelectedItems
                 .Cast<IDictionary<string, object>>()
                 .ToList();
@@ -478,7 +719,12 @@ namespace CSVStudio.Views
             if (e.EditAction == DataGridEditAction.Commit
                 && _editingRow != null && _editingKey != null && _editingTextBox != null)
             {
-                _editingRow[_editingKey] = _editingTextBox.Text;
+                var oldVal = _editingRow.TryGetValue(_editingKey, out var ov) ? ov?.ToString() ?? "" : "";
+                if (oldVal != _editingTextBox.Text)
+                {
+                    PushUndo();
+                    _editingRow[_editingKey] = _editingTextBox.Text;
+                }
             }
 
             _editingTextBox = null;
