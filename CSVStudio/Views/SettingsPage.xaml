@@ -83,10 +83,10 @@
                                              Click="SendFeedback_Click"
                                              Padding="0"/>
                             <HyperlinkButton Content="🛟  Support"
-                                             NavigateUri="https://github.com/labsdevcloud/CSVStudio/blob/master/SUPPORT.md"
+                                             NavigateUri="https://labsdev.it/support.html"
                                              Padding="0"/>
                             <HyperlinkButton Content="🔒  Privacy policy"
-                                             NavigateUri="https://github.com/labsdevcloud/CSVStudio/blob/master/PRIVACY.md"
+                                             NavigateUri="https://labsdev.it/privacy.html"
                                              Padding="0"/>
                             <HyperlinkButton Content="🐛  Report an issue"
                                              NavigateUri="https://github.com/labsdevcloud/CSVStudio/issues"
